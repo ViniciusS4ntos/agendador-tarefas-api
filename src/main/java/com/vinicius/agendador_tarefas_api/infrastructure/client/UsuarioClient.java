@@ -12,4 +12,8 @@ public interface UsuarioClient {
     @GetMapping
     UsuarioDTO buscarUsuarioPorEmail(@RequestParam("email") String email,
                                      @RequestHeader("Authorization") String token);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 463f3ec (adicionadas configuracoes de security)
 }

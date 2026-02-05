@@ -2,14 +2,26 @@ package com.vinicius.agendador_tarefas_api.infrastructure.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+<<<<<<< HEAD
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
 
+=======
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Service;
+
+import javax.crypto.SecretKey;
+>>>>>>> 463f3ec (adicionadas configuracoes de security)
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Service
 public class JwtUtil {
+<<<<<<< HEAD
+=======
+
+>>>>>>> 463f3ec (adicionadas configuracoes de security)
     // Chave secreta usada para assinar e verificar tokens JWT
     private final String secretKey = "sua-chave-secreta-super-segura-que-deve-ser-bem-longa";
 
