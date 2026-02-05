@@ -3,13 +3,11 @@ package com.vinicius.agendador_tarefas_api.infrastructure.security;
 
 import com.vinicius.agendador_tarefas_api.business.dto.UsuarioDTO;
 import com.vinicius.agendador_tarefas_api.infrastructure.client.UsuarioClient;
-import com.vinicius.user_api.insfrastructure.entity.Usuario;
-import com.vinicius.user_api.insfrastructure.repository.UsuarioRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 import org.springframework.stereotype.Service;
 
 @Service
