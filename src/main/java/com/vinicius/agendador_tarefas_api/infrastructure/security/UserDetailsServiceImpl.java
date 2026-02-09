@@ -14,9 +14,9 @@ public class UserDetailsServiceImpl {
     @Autowired
     private UsuarioClient client;
 
-    public UserDetails carregaDadosUsuario(String email, String token){
+    public UserDetails carregaDadosUsuario(String email, String token) {
 
-        UsuarioDTO usuarioDTO  = client.buscarUsuarioPorEmail(email, token);
+        UsuarioDTO usuarioDTO = client.buscarUsuarioPorEmail(email, token);
         return User
                 .withUsername(usuarioDTO.getEmail()) // Define o nome de usuário como o e-mail
                 .password(usuarioDTO.getSenha()) // Define a senha do usuário
