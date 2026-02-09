@@ -1,48 +1,52 @@
 package com.vinicius.agendador_tarefas_api.infrastructure.security;
 
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.io.Decoders;
 
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Date;
-
 
 @Service
 public class JwtUtil {
 
-    // Chave secreta usada para assinar e verificar tokens JWT
-    private final String secretKey = "sua-chave-secreta-super-segura-que-deve-ser-bem-longa";
+    // IMPORTANTE: para HS256 precisa ter pelo menos 256 bits (32 caracteres)
+    private static final String SECRET_KEY = "sua-chave-secreta-super-segura-que-deve-ser-bem-longa";
 
-    // Extrai as claims do token JWT (informações adicionais do token)
-    public Claims extractClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8))) // Define a chave secreta para validar a assinatura do token
-                .build()
-                .parseClaimsJws(token) // Analisa o token JWT e obtém as claims
-                .getBody(); // Retorna o corpo das claims
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    // Extrai o nome de usuário do token JWT
+    // Extrai todas as claims do token
+    public Claims extractClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    // Extrai o username (subject)
     public String extractUsername(String token) {
-        // Obtém o assunto (nome de usuário) das claims do token
         return extractClaims(token).getSubject();
     }
 
-    // Verifica se o token JWT está expirado
-    public boolean isTokenExpired(String token) {
-        // Compara a data de expiração do token com a data atual
-        return extractClaims(token).getExpiration().before(new Date());
+    // Extrai a data de expiração
+    public Date extractExpiration(String token) {
+        return extractClaims(token).getExpiration();
     }
 
-    // Valida o token JWT verificando o nome de usuário e se o token não está expirado
+    // Verifica se o token está expirado
+    public boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    // Valida token
     public boolean validateToken(String token, String username) {
-        // Extrai o nome de usuário do token
         final String extractedUsername = extractUsername(token);
-        // Verifica se o nome de usuário do token corresponde ao fornecido e se o token não está expirado
-        return (extractedUsername.equals(username) && !isTokenExpired(token));
+        return extractedUsername.equals(username) && !isTokenExpired(token);
     }
 }
