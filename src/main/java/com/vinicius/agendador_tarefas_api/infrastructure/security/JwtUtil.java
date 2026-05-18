@@ -7,6 +7,7 @@ import io.jsonwebtoken.io.Decoders;
 
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -17,7 +18,7 @@ public class JwtUtil {
     private static final String SECRET_KEY = "sua-chave-secreta-super-segura-que-deve-ser-bem-longa";
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
     }
 
     // Extrai todas as claims do token
