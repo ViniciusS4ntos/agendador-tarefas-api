@@ -5,56 +5,81 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 
-// Define a classe JwtRequestFilter, que estende OncePerRequestFilter
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-    // Define propriedades para armazenar instâncias de JwtUtil e UserDetailsService
     private final JwtUtil jwtUtil;
-    private final UserDetailsServiceImpl userDetailsService;
 
-    // Construtor que inicializa as propriedades com instâncias fornecidas
-    public JwtRequestFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService) {
+    // Construtor simplificado apenas com o que o filtro realmente usa agora
+    public JwtRequestFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
     }
 
-    // Método chamado uma vez por requisição para processar o filtro
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        // Obtém o valor do header "Authorization" da requisição
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        String auth = request.getHeader("Authorization");
+
+        System.out.println("=== FILTRO JWT ===");
+        System.out.println("URI: " + path);
+        System.out.println("Method: " + method);
+        System.out.println("Auth header presente: " + (auth != null));
+        System.out.println("Content-Type: " + request.getContentType());
+        System.out.println("Auth atual no contexto ANTES: " + SecurityContextHolder.getContext().getAuthentication());
+
+        // Atalho rápido: se for rota do Swagger, nem perde tempo processando o bloco de token
+        if (path.contains("/swagger-ui") || path.contains("/v3/api-docs")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         final String authorizationHeader = request.getHeader("Authorization");
 
-        // Verifica se o cabeçalho existe e começa com "Bearer "
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            // Extrai o token JWT do cabeçalho
-            final String token = authorizationHeader.substring(7); // tirando o [Bearer ]
-            // Extrai o nome de usuário do token JWT
-            final String username = jwtUtil.extractUsername(token);
+            final String token = authorizationHeader.substring(7);
 
-            // Se o nome de usuário não for nulo e o usuário não estiver autenticado ainda
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                // Carrega os detalhes do usuário a partir do nome de usuário
-                UserDetails userDetails = userDetailsService.carregaDadosUsuario(username, authorizationHeader);
-                // Valida o token JWT
-                if (jwtUtil.validateToken(token, username)) {
-                    // Cria um objeto de autenticação com as informações do usuário
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    // Define a autenticação no contexto de segurança
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+            try {
+                final String username = jwtUtil.extractUsername(token);
+
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                    if (jwtUtil.validateToken(token, username)) {
+
+                        // Criamos a autoridade padrão com o prefixo correto do Spring Security
+                        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
+
+                        // Monta o UserDetails em memória de forma stateless
+                        UserDetails userDetails = org.springframework.security.core.userdetails.User
+                                .withUsername(username)
+                                .password("")
+                                .authorities(Collections.singletonList(authority))
+                                .build();
+
+                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        System.out.println("Autenticação Stateless concluída para: " + username);
+                    }
                 }
+            } catch (Exception e) {
+                // Captura falhas de token malformado ou expirado sem quebrar o filtro pai do Spring
+                System.out.println("Erro ao validar token no Agendador: " + e.getMessage());
             }
         }
 
-        // Continua a cadeia de filtros, permitindo que a requisição prossiga
+        System.out.println("Auth atual no contexto DEPOIS: " + SecurityContextHolder.getContext().getAuthentication());
+
         chain.doFilter(request, response);
     }
 }

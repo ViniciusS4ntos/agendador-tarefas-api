@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients
-public class AgendadorTarefasApiApplication {
+public class  AgendadorTarefasApiApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(AgendadorTarefasApiApplication.class, args);

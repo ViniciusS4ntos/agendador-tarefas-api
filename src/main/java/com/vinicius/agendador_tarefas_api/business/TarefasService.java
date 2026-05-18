@@ -76,7 +76,9 @@ public class TarefasService {
             TarefasDTORecord dtoFinal = new TarefasDTORecord(null, dto.nomeTarefa(),dto.descricao(),dto.dataCriacao(),
                     dto.dataEvento(),dto.emailUsuario(),LocalDateTime.now(), dto.statusNotificacaoEnum());
 
-            return tarefasConverter.paraTarefaDTO(tarefaUpdateConverter.updateTarefas(dtoFinal, entity));
+
+            TarefasEntity tarefa = tarefasRepository.save(tarefaUpdateConverter.updateTarefas(dtoFinal, entity));
+            return tarefasConverter.paraTarefaDTO(tarefa);
 
         } catch (ResourceNotFoundException e) {
             throw new ResourceNotFoundException("Error ao alterar status da  tarefa: " + id, e.getCause());

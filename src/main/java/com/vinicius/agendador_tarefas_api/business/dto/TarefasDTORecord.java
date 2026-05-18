@@ -11,13 +11,17 @@ public record TarefasDTORecord(
         String id,
         String nomeTarefa,
         String descricao,
+
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm")
         LocalDateTime dataCriacao,
+
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm")
         LocalDateTime dataEvento,
+
         String emailUsuario,
+
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm")
         LocalDateTime dataAlteracao,
+
         StatusNotificacaoEnum statusNotificacaoEnum
-) {
-}
+) {}
